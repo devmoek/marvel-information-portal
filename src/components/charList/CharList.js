@@ -70,8 +70,8 @@ class CharList extends Component {
         this.itemRefs[id].focus();
     }
 
-    // Этот метод создан для оптимизации, 
-    // чтобы не помещать такую конструкцию в метод render
+    // This method is created for optimization,
+    // to avoid placing such a construction in the render method
     renderItems(arr) {
         const items =  arr.map((item, i) => {
             let imgStyle = {'objectFit' : 'cover'};
@@ -101,7 +101,7 @@ class CharList extends Component {
                 </li>
             )
         });
-        // А эта конструкция вынесена для центровки спиннера/ошибки
+        // And this design is for spinner alignment/ error
         return (
             <ul className="char__grid">
                 {items}
