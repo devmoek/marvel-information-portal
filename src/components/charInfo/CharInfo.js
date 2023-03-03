@@ -112,11 +112,10 @@ const View = ({char}) => {
         <div className="char__comics">Comics:</div>
         <ul className="char__comics-list">
         {comics.length > 0 ? null : 'There is no comics with this character'}
-
             {
                 comics.map((item, i) => {
 
-                    // can cause different bugs
+                    // eslint-disable-next-line
                     if (i > 9) return;
                     return(
                         <li key={i} className="char__comics-item">
