@@ -1,4 +1,4 @@
-import {Component} from 'react';
+import { useState, useEffect, useRef } from 'react';
 import PropTypes from 'prop-types'
 
 import Spinner from '../spinner/Spinner';
@@ -6,73 +6,61 @@ import ErrorMessage from '../errorMessage/ErrorMessage';
 import MarvelService from '../../services/MarvelService';
 import './charList.scss';
 
-class CharList extends Component {
+const CharList = (props) => {
 
-    state = {
-        charList: [],
-        loading: true,
-        error: false,
-        newItemsLoading: false,
-        offset: 210,
-        charsEnded: false
-    }
+    const [charList, setCharList] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(false);
+    const [newItemsLoading, setNewItemsLoading] = useState(false);
+    const [offset, setOffset] = useState(210);
+    const [charsEnded, setCharsEnded] = useState(false);
     
-    marvelService = new MarvelService();
+    const marvelService = new MarvelService();
 
-    componentDidMount() {
-        this.onRequest();
+    useEffect(() => {
+        onRequest();
+    }, [])
+
+    const onRequest = (offset) => {
+        onCharListLoading();
+        marvelService.getAllCharacters(offset)
+        .then(onCharListLoaded)
+        .catch(onError)
     }
 
-    onRequest = (offset) => {
-        this.onCharListLoading();
-        this.marvelService.getAllCharacters(offset)
-        .then(this.onCharListLoaded)
-        .catch(this.onError)
+    const onCharListLoading = () => {
+        setNewItemsLoading(true);
     }
 
-    onCharListLoading = () => {
-        this.setState({
-            newItemsLoading: true
-        })
-    }
-
-    onCharListLoaded = (newCharList) => {
+    const onCharListLoaded = (newCharList) => {
         let ended = false;
         if(newCharList.length < 9) {
             ended = true;
         }
 
-        this.setState(({offset, charList}) => ({
-            charList: [...charList, ...newCharList],
-            loading: false,
-            newItemsLoading: false,
-            offset: offset + 9,
-            charsEnded: ended
-        }))
+        setCharList(charList => [...charList, ...newCharList]);
+        setLoading(loading => false);
+        setNewItemsLoading(newItemsLoading => false);
+        setOffset(offset => offset + 9);
+        setCharsEnded(charsEnded => ended);
     }
 
-    onError = () => {
-        this.setState({
-            error: true,
-            loading: false
-        })
+    const onError = () => {
+        setError(true);
+        setLoading(false);
     }
 
-    itemRefs = [];
+    const itemRefs = useRef([]);
 
-    setRef = (ref) => {
-        this.itemRefs.push(ref);
-    }
-
-    focusOnItem = (id) => {
-        this.itemRefs.forEach(item => item.classList.remove('char__item_selected'));
-        this.itemRefs[id].classList.add('char__item_selected');
-        this.itemRefs[id].focus();
+    const focusOnItem = (id) => {
+        itemRefs.current.forEach(item => item.classList.remove('char__item_selected'));
+        itemRefs.current[id].classList.add('char__item_selected');
+        itemRefs.current[id].focus();
     }
 
     // This method is created for optimization,
     // to avoid placing such a construction in the render method
-    renderItems(arr) {
+    function renderItems(arr) {
         const items =  arr.map((item, i) => {
             let imgStyle = {'objectFit' : 'cover'};
             if (item.thumbnail === 'http://i.annihil.us/u/prod/marvel/i/mg/b/40/image_not_available.jpg') {
@@ -84,16 +72,16 @@ class CharList extends Component {
                     className="char__item"
                     tabIndex={0}
                     key={item.id}
-                    ref={this.setRef}
+                    ref={el => itemRefs.current[i] = el}
                     onClick={() => {
-                        this.props.onCharSelected(item.id); 
-                        this.focusOnItem(i);
+                        props.onCharSelected(item.id); 
+                        focusOnItem(i);
                         
                     }}
                     onKeyPress={(e) => {
                         if (e.key === " " || e.key === 'Enter') {
-                            this.props.onCharSelected(item.id);
-                            this.focusOnItem(i);
+                            props.onCharSelected(item.id);
+                            focusOnItem(i);
                         }
                     }}>
                         <img src={item.thumbnail} alt={item.name} style={imgStyle}/>
@@ -108,32 +96,27 @@ class CharList extends Component {
             </ul>
         )
     }
+    
+    const items = renderItems(charList);
 
-    render() {
+    const errorMessage = error ? <ErrorMessage/> : null;
+    const spinner = loading ? <Spinner/> : null;
+    const content = !(loading || error) ? items : null;
 
-        const {charList, loading, error, offset, newItemsLoading, charsEnded} = this.state;
-        
-        const items = this.renderItems(charList);
-
-        const errorMessage = error ? <ErrorMessage/> : null;
-        const spinner = loading ? <Spinner/> : null;
-        const content = !(loading || error) ? items : null;
-
-        return (
-            <div className="char__list">
-                {errorMessage}
-                {spinner}
-                {content}
-                <button 
-                    className="button button__main button__long"
-                    disabled={newItemsLoading}
-                    style={{'display': charsEnded ? 'none' : 'block'}}
-                    onClick={() => this.onRequest(offset)}>
-                    <div className="inner">load more</div>
-                </button>
-            </div>
-        )
-    }
+    return (
+        <div className="char__list">
+            {errorMessage}
+            {spinner}
+            {content}
+            <button 
+                className="button button__main button__long"
+                disabled={newItemsLoading}
+                style={{'display': charsEnded ? 'none' : 'block'}}
+                onClick={() => onRequest(offset)}>
+                <div className="inner">load more</div>
+            </button>
+        </div>
+    )
 }
 
 CharList.propTypes = {
