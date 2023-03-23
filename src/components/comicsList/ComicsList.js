@@ -1,4 +1,6 @@
 import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
+
 import ErrorMessage from '../errorMessage/ErrorMessage';
 import Spinner from '../spinner/Spinner';
 import useMarvelService from '../../services/MarvelService';
@@ -44,14 +46,13 @@ const ComicsList = (props) => {
                 <li 
                     className="comics__item"
                     tabIndex={0}
-                    key={item.id}
-                    // onClick={() => {
-                    //     props.onCharSelected(item.id);    
-                    // }}
+                    key={i}
                     >
+                    <Link to={`/comics/${item.id}`}>
                         <img className="comics__item-img" src={item.thumbnail} alt={item.title}/>
                         <div className="comics__item-name">{item.title}</div>
                         <div className="comics__item-price">{item.price}</div>
+                    </Link>
                 </li>
             )
         });
