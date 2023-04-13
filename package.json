@@ -9,6 +9,7 @@
     "@testing-library/user-event": "^12.1.10",
     "compose-function": "^3.0.3",
     "es6-iterator": "^2.0.3",
+    "formik": "^2.2.9",
     "gh-pages": "^5.0.0",
     "prop-types": "^15.8.1",
     "react": "^18.2.0",
@@ -19,7 +20,8 @@
     "react-transition-group": "^4.4.5",
     "resolve-url-loader": "^5.0.0",
     "testing-library": "^0.0.2",
-    "web-vitals": "^1.0.1"
+    "web-vitals": "^1.0.1",
+    "yup": "^1.1.0"
   },
   "scripts": {
     "predeploy": "npm run build",
