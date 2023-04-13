@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import PropTypes from 'prop-types'
+import { TransitionGroup, CSSTransition } from 'react-transition-group';
 
 import Spinner from '../spinner/Spinner';
 import ErrorMessage from '../errorMessage/ErrorMessage';
@@ -25,16 +26,16 @@ const CharList = (props) => {
             .then(onCharListLoaded)
     }
 
-    const onCharListLoaded = (newCharList) => {
+    const onCharListLoaded = async(newCharList) => {
         let ended = false;
         if(newCharList.length < 9) {
             ended = true;
         }
 
-        setCharList(charList => [...charList, ...newCharList]);
-        setNewItemsLoading(newItemsLoading => false);
+        setCharList([...charList, ...newCharList]);
+        setNewItemsLoading(false);
         setOffset(offset => offset + 9);
-        setCharsEnded(charsEnded => ended);
+        setCharsEnded(ended);
     }
 
     const itemRefs = useRef([]);
@@ -45,8 +46,6 @@ const CharList = (props) => {
         itemRefs.current[id].focus();
     }
 
-    // This method is created for optimization,
-    // to avoid placing such a construction in the render method
     function renderItems(arr) {
         const items =  arr.map((item, i) => {
             let imgStyle = {'objectFit' : 'cover'};
@@ -55,31 +54,34 @@ const CharList = (props) => {
             }
             
             return (
-                <li 
-                    className="char__item"
-                    tabIndex={0}
-                    key={item.id}
-                    ref={el => itemRefs.current[i] = el}
-                    onClick={() => {
-                        props.onCharSelected(item.id); 
-                        focusOnItem(i);
-                        
-                    }}
-                    onKeyPress={(e) => {
-                        if (e.key === " " || e.key === 'Enter') {
-                            props.onCharSelected(item.id);
+                <CSSTransition key={item.id} timeout={500} classNames="char__item">
+                    <li 
+                        className="char__item"
+                        tabIndex={0}
+                        ref={el => itemRefs.current[i] = el}
+                        onClick={() => {
+                            props.onCharSelected(item.id); 
                             focusOnItem(i);
-                        }
-                    }}>
-                        <img src={item.thumbnail} alt={item.name} style={imgStyle}/>
-                        <div className="char__name">{item.name}</div>
-                </li>
+                            
+                        }}
+                        onKeyPress={(e) => {
+                            if (e.key === " " || e.key === 'Enter') {
+                                props.onCharSelected(item.id);
+                                focusOnItem(i);
+                            }
+                        }}>
+                            <img src={item.thumbnail} alt={item.name} style={imgStyle}/>
+                            <div className="char__name">{item.name}</div>
+                    </li>
+                </CSSTransition>
             )
         });
         // And this design is for spinner alignment/ error
         return (
             <ul className="char__grid">
-                {items}
+                <TransitionGroup component={null}>
+                    {items}
+                </TransitionGroup>
             </ul>
         )
     }

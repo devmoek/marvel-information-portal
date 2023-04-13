@@ -16,6 +16,7 @@
     "react-helmet": "^6.1.0",
     "react-router-dom": "^6.9.0",
     "react-scripts": "^5.0.1",
+    "react-transition-group": "^4.4.5",
     "resolve-url-loader": "^5.0.0",
     "testing-library": "^0.0.2",
     "web-vitals": "^1.0.1"
