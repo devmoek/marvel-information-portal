@@ -48,7 +48,7 @@ const View = ({comic}) => {
             <Helmet>
                 <meta
                     name="description"
-                    content={description}
+                    content={`${title} comics book`}
                 />
                 <title>{title}</title>
             </Helmet>
