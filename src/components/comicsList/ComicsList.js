@@ -36,9 +36,9 @@ const ComicsList = (props) => {
         }
 
         setComicsList(comicsList => [...comicsList, ...newComicsList]);
-        setNewItemsLoading(newItemsLoading => false);
+        setNewItemsLoading(false);
         setOffset(offset => offset + 9);
-        setComicsEnded(comicsEnded => ended);
+        setComicsEnded(ended);
     }
 
     function renderItems(arr) {
