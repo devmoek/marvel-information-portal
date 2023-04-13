@@ -16,6 +16,8 @@
     "react-helmet": "^6.1.0",
     "react-router-dom": "^6.9.0",
     "react-scripts": "^5.0.1",
+    "resolve-url-loader": "^5.0.0",
+    "testing-library": "^0.0.2",
     "web-vitals": "^1.0.1"
   },
   "scripts": {
@@ -45,6 +47,8 @@
     ]
   },
   "devDependencies": {
+    "eslint-config-react-app": "^7.0.1",
+    "eslint-plugin-testing-library": "^5.10.3",
     "sass": "^1.38.0"
   }
 }
