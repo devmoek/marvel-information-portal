@@ -1,11 +1,26 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import PropTypes from 'prop-types'
-import { TransitionGroup, CSSTransition } from 'react-transition-group';
 
 import Spinner from '../spinner/Spinner';
 import ErrorMessage from '../errorMessage/ErrorMessage';
+
 import useMarvelService from '../../services/MarvelService';
 import './charList.scss';
+
+const setContent = (process, Component, newItemsLoading) => {
+    switch (process) {
+        case 'waiting':
+            return <Spinner/>;
+        case 'loading':
+            return newItemsLoading ? <Component/> : <Spinner/>;
+        case 'confirmed':
+            return <Component/>;
+        case 'error':
+            return <ErrorMessage/>;
+        default:
+            throw new Error('Unexpected process state');
+    }
+}
 
 const CharList = (props) => {
 
@@ -14,16 +29,18 @@ const CharList = (props) => {
     const [offset, setOffset] = useState(210);
     const [charsEnded, setCharsEnded] = useState(false);
     
-    const {loading, error, getAllCharacters} = useMarvelService();
+    const {getAllCharacters, process, setProcess} = useMarvelService();
 
     useEffect(() => {
         onRequest(offset, true);
+        //eslint-disable-next-line
     }, [])
 
     const onRequest = (offset, initial) => {
         initial ? setNewItemsLoading(false) : setNewItemsLoading(true);
         getAllCharacters(offset)
             .then(onCharListLoaded)
+            .then(() => setProcess('confirmed'))
     }
 
     const onCharListLoaded = async(newCharList) => {
@@ -54,48 +71,43 @@ const CharList = (props) => {
             }
             
             return (
-                <CSSTransition key={item.id} timeout={500} classNames="char__item">
-                    <li 
-                        className="char__item"
-                        tabIndex={0}
-                        ref={el => itemRefs.current[i] = el}
-                        onClick={() => {
-                            props.onCharSelected(item.id); 
+                <li 
+                    className="char__item"
+                    tabIndex={0}
+                    ref={el => itemRefs.current[i] = el}
+                    key={i}
+                    onClick={() => {
+                        props.onCharSelected(item.id); 
+                        focusOnItem(i);
+                        
+                    }}
+                    onKeyPress={(e) => {
+                        if (e.key === " " || e.key === 'Enter') {
+                            props.onCharSelected(item.id);
                             focusOnItem(i);
-                            
-                        }}
-                        onKeyPress={(e) => {
-                            if (e.key === " " || e.key === 'Enter') {
-                                props.onCharSelected(item.id);
-                                focusOnItem(i);
-                            }
-                        }}>
-                            <img src={item.thumbnail} alt={item.name} style={imgStyle}/>
-                            <div className="char__name">{item.name}</div>
-                    </li>
-                </CSSTransition>
+                        }
+                    }}>
+                        <img src={item.thumbnail} alt={item.name} style={imgStyle}/>
+                        <div className="char__name">{item.name}</div>
+                </li>
             )
         });
         // And this design is for spinner alignment/ error
         return (
             <ul className="char__grid">
-                <TransitionGroup component={null}>
-                    {items}
-                </TransitionGroup>
+                {items}
             </ul>
         )
     }
+
+    const elemenets = useMemo(()  => {
+        return setContent(process, () => renderItems(charList), newItemsLoading)
+        //eslint-disable-next-line
+    }, [process])
     
-    const items = renderItems(charList);
-
-    const errorMessage = error ? <ErrorMessage/> : null;
-    const spinner = loading && !newItemsLoading ? <Spinner/> : null;
-
     return (
         <div className="char__list">
-            {errorMessage}
-            {spinner}
-            {items}
+            {elemenets}
             <button 
                 className="button button__main button__long"
                 disabled={newItemsLoading}
